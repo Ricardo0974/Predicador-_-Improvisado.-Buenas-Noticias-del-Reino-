@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicador Improvisado</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 10px;
+            margin: 0;
+        }
+        h1 {
+            color: #8B4513;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 1.5rem;
+            margin: 10px 0;
+        }
+        h2 {
+            font-size: 1.2rem;
+            margin: 5px 0 15px;
+        }
+        .contenedor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .rueda-container {
+            position: relative;
+            width: 90vw;
+            max-width: 300px;
+            height: 90vw;
+            max-height: 300px;
+            margin: 10px auto;
+        }
+        .rueda {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            transform: rotate(0deg);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .rueda-seccion {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+            border: 1px solid #fff;
+            box-sizing: border-box;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.7);
+        }
+        .tema {
+            font-size: 11px;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
+        .numero {
+            font-size: 12px;
+            margin-bottom: 2px;
+        }
+        .texto {
+            font-size: 8px;
+            font-style: italic;
+        }
+        .flecha {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 20px solid #8B4513;
+            z-index: 10;
+        }
+        .botones {
+            margin: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+        #btnGirar {
+            background-color: #4CAF50; /* Verde */
+        }
+        #btnDetener {
+            background-color: #f44336; /* Rojo */
+        }
+        #btnReiniciar {
+            background-color: #2196F3; /* Azul */
+        }
+        button {
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            min-width: 80px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .jugadores {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+            margin: 10px auto;
+            width: 90%;
+            max-width: 300px;
+        }
+        input {
+            padding: 6px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 70%;
+        }
+        #lista-jugadores {
+            list-style-type: none;
+            padding: 0;
+            margin: 5px 0;
+            text-align: left;
+        }
+        #lista-jugadores li {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        #reglas {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px auto;
+            width: 90%;
+            max-width: 500px;
+            text-align: left;
+            font-size: 14px;
+        }
+        #tema-seleccionado {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B4513;
+            margin: 10px;
+            min-height: 30px;
+        }
+        .puntaje {
+            font-weight: bold;
+            color: #8B4513;
+        }
+        @media (min-width: 768px) {
+            .contenedor {
+                flex-direction: row;
+                justify-content: center;
+                align-items: flex-start;
+            }
+            .rueda-container {
+                max-width: 350px;
+                max-height: 350px;
+            }
+            .rueda-seccion {
+                font-size: 12px;
+            }
+            .tema {
+                font-size: 14px;
+            }
+            .numero {
+                font-size: 16px;
+            }
+            .texto {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Predicador Improvisado</h1>
+    <h2>Buenas Noticias del Reino</h2>
+
+    <div class="contenedor">
+        <div class="rueda-container">
+            <div class="flecha"></div>
+            <div class="rueda" id="rueda"></div>
+        </div>
+
+        <div class="jugadores">
+            <h3>Jugadores</h3>
+            <input type="text" id="nombre-jugador" placeholder="Nombre del jugador">
+            <button onclick="agregarJugador()">Agregar</button>
+            <ul id="lista-jugadores"></ul>
+        </div>
+    </div>
+
+    <div id="tema-seleccionado"></div>
+
+    <div class="botones">
+        <button id="btnGirar" onclick="girarRueda()">Girar</button>
+        <button id="btnDetener" onclick="detenerRueda()">Parar</button>
+        <button id="btnReiniciar" onclick="reiniciarJuego()">Reiniciar</button>
+    </div>
+
+    <div id="reglas">
+        <h3>Reglas del Juego</h3>
+        <p>1. Cada jugador gira la rueda y debe predicar <strong>1 minuto</strong> sobre el tema seleccionado.</p>
+        <p>2. Gana quien acumule más puntos (según el número en la sección).</p>
+        <p>3. Si la rueda cae en <strong>"Perdón"</strong>, ¡pierdes 2 puntos!</p>
+        <p>4. El jugador con más puntos al final de 3 rondas gana.</p>
+    </div>
+
+    <script>
+        // Datos de la rueda (20 temas bíblicos)
+        const temasOriginal = [
+            { tema: "Fe", numero: 5, texto: "Hebreos 11:1", color: "#FF5733" },
+            { tema: "Amor", numero: 3, texto: "1 Corintios 13:4", color: "#33FF57" },
+            { tema: "Perdón", numero: -2, texto: "Mateo 6:14", color: "#3357FF" },
+            { tema: "Esperanza", numero: 4, texto: "Romanos 15:13", color: "#F033FF" },
+            { tema: "Paciencia", numero: 2, texto: "Santiago 5:8", color: "#FF33F0" },
+            { tema: "Humildad", numero: 3, texto: "Filipenses 2:3", color: "#33FFF0" },
+            { tema: "Oración", numero: 4, texto: "1 Tesalonicenses 5:17", color: "#FFC733" },
+            { tema: "Servicio", numero: 3, texto: "Marcos 10:45", color: "#33FF8C" },
+            { tema: "Gratitud", numero: 2, texto: "1 Tesalonicenses 5:18", color: "#8C33FF" },
+            { tema: "Paz", numero: 5, texto: "Juan 14:27", color: "#FF338C" },
+            { tema: "Valentía", numero: 4, texto: "Josué 1:9", color: "#33A2FF" },
+            { tema: "Sabiduría", numero: 5, texto: "Proverbios 3:13", color: "#FF33A2" },
+            { tema: "Generosidad", numero: 3, texto: "2 Corintios 9:7", color: "#A2FF33" },
+            { tema: "Perseverancia", numero: 4, texto: "Gálatas 6:9", color: "#FF5733" },
+            { tema: "Alegría", numero: 3, texto: "Filipenses 4:4", color: "#33FFBD" },
+            { tema: "Honestidad", numero: 2, texto: "Proverbios 12:22", color: "#BD33FF" },
+            { tema: "Misericordia", numero: 4, texto: "Mateo 5:7", color: "#FFBD33" },
+            { tema: "Temor de Dios", numero: 5, texto: "Proverbios 9:10", color: "#33FF57" },
+            { tema: "Unidad", numero: 3, texto: "Salmo 133:1", color: "#5733FF" },
+            { tema: "Evangelio", numero: 6, texto: "Romanos 1:16", color: "#33FF8C" }
+        ];
+
+        // Variables del juego
+        let anguloActual = 0;
+        let girando = false;
+        let intervalo;
+        let jugadores = [];
+        let temasDisponibles = [...temasOriginal];
+        let temaActual = null;
+
+        // Inicializar la rueda
+        function inicializarRueda() {
+            const rueda = document.getElementById('rueda');
+            rueda.innerHTML = '';
+
+            // Si no quedan temas, reiniciamos
+            if (temasDisponibles.length === 0) {
+                temasDisponibles = [...temasOriginal];
+            }
+
+            temasDisponibles.forEach((item, index) => {
+                const angulo = (360 / temasDisponibles.length) * index;
+                const seccion = document.createElement('div');
+                seccion.className = 'rueda-seccion';
+                seccion.style.transform = `rotate(${angulo}deg)`;
+                seccion.style.backgroundColor = item.color;
+                seccion.innerHTML = `
+                    <span class="tema">${item.tema}</span>
+                    <span class="numero">${item.numero}</span>
+                    <span class="texto">${item.texto}</span>
+                `;
+                rueda.appendChild(seccion);
+            });
+        }
+
+        // Girar la rueda
+        function girarRueda() {
+            if (girando || temasDisponibles.length === 0) return;
+            girando = true;
+            const rueda = document.getElementById('rueda');
+            const vueltas = 5;
+            const anguloFinal = anguloActual + (360 * vueltas) + Math.floor(Math.random() * 360);
+
+            intervalo = setInterval(() => {
+                anguloActual += 5;
+                if (anguloActual >= anguloFinal) {
+                    clearInterval(intervalo);
+                    detenerRueda();
+                    return;
+                }
+                rueda.style.transform = `rotate(${anguloActual}deg)`;
+            }, 10);
+        }
+
+        // Detener la rueda y mostrar el tema seleccionado
+        function detenerRueda() {
+            if (!girando) return;
+            clearInterval(intervalo);
+            girando = false;
+
+            const anguloPorSeccion = 360 / temasDisponibles.length;
+            const anguloNormalizado = anguloActual % 360;
+            const indiceSeleccionado = Math.floor(((360 - anguloNormalizado) % 360) / anguloPorSeccion);
+            
+            temaActual = temasDisponibles[indiceSeleccionado];
+            temasDisponibles.splice(indiceSeleccionado, 1); // Eliminar tema usado
+
+            document.getElementById('tema-seleccionado').innerHTML = `
+                <p>Tema: ${temaActual.tema}</p>
+                <p>Puntos: ${temaActual.numero}</p>
+                <p>Texto: ${temaActual.texto}</p>
+            `;
+
+            // Actualizar puntajes si hay jugadores
+            if (jugadores.length > 0) {
+                const jugadorActual = jugadores[0]; // Simplificación: turno del primer jugador
+                jugadorActual.puntaje += temaActual.numero;
+                actualizarListaJugadores();
+                // Rotar jugadores (opcional)
+                jugadores.push(jugadores.shift());
+            }
+        }
+
+        // Reiniciar el juego
+        function reiniciarJuego() {
+            anguloActual = 0;
+            temasDisponibles = [...temasOriginal];
+            document.getElementById('rueda').style.transform = 'rotate(0deg)';
+            document.getElementById('tema-seleccionado').innerHTML = '';
+            inicializarRueda();
+        }
+
+        // Agregar jugador
+        function agregarJugador() {
+            const nombre = document.getElementById('nombre-jugador').value.trim();
+            if (nombre && !jugadores.some(j => j.nombre === nombre)) {
+                jugadores.push({
+                    nombre: nombre,
+                    puntaje: 0
+                });
+                actualizarListaJugadores();
+                document.getElementById('nombre-jugador').value = '';
+            }
+        }
+
+        // Actualizar lista de jugadores con puntajes
+        function actualizarListaJugadores() {
+            const lista = document.getElementById('lista-jugadores');
+            lista.innerHTML = '';
+            jugadores.forEach(jugador => {
+                const item = document.createElement('li');
+                item.innerHTML = `
+                    <span>${jugador.nombre}</span>
+                    <span class="puntaje">${jugador.puntaje} pts</span>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        // Inicializar el juego al cargar la página
+        window.onload = inicializarRueda;
+    </script>
+</body>
+</html>
