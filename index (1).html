@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicador Improvisado</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+            padding: 10px;
+            margin: 0;
+        }
+        h1 {
+            color: #8B4513;
+            text-shadow: 1px 1px 2px #000;
+            font-size: 1.5rem;
+            margin: 10px 0;
+        }
+        h2 {
+            font-size: 1.2rem;
+            margin: 5px 0 15px;
+        }
+        .contenedor {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .rueda-container {
+            position: relative;
+            width: 90vw;
+            max-width: 300px;
+            height: 90vw;
+            max-height: 300px;
+            margin: 10px auto;
+        }
+        .rueda {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            transform: rotate(0deg);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .rueda-seccion {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-weight: bold;
+            font-size: 9px;
+            border: 1px solid #fff;
+            box-sizing: border-box;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.7);
+            padding: 2px;
+        }
+        .tema {
+            font-size: 10px;
+            margin-bottom: 1px;
+            font-weight: bold;
+            line-height: 1.1;
+        }
+        .numero {
+            font-size: 10px;
+            margin-bottom: 1px;
+        }
+        .texto {
+            font-size: 7px;
+            font-style: italic;
+            line-height: 1.1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .flecha {
+            position: absolute;
+            top: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 20px solid #8B4513;
+            z-index: 10;
+        }
+        .botones {
+            margin: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+        }
+        #btnGirar {
+            background-color: #4CAF50;
+        }
+        #btnDetener {
+            background-color: #f44336;
+        }
+        #btnReiniciar {
+            background-color: #2196F3;
+        }
+        #btnTemporizador {
+            background-color: #FF9800;
+        }
+        button {
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            min-width: 80px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .jugadores {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+            margin: 10px auto;
+            width: 90%;
+            max-width: 300px;
+        }
+        input {
+            padding: 6px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 70%;
+        }
+        #lista-jugadores {
+            list-style-type: none;
+            padding: 0;
+            margin: 5px 0;
+            text-align: left;
+        }
+        #lista-jugadores li {
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        #reglas {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px auto;
+            width: 90%;
+            max-width: 500px;
+            text-align: left;
+            font-size: 14px;
+        }
+        #tema-seleccionado {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B4513;
+            margin: 10px;
+            min-height: 30px;
+        }
+        .puntaje {
+            font-weight: bold;
+            color: #8B4513;
+        }
+        #temporizador {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f44336;
+            margin: 10px;
+        }
+        .dificultad {
+            font-size: 8px;
+            font-style: italic;
+            margin-top: 1px;
+        }
+        @media (min-width: 768px) {
+            .contenedor {
+                flex-direction: row;
+                justify-content: center;
+                align-items: flex-start;
+            }
+            .rueda-container {
+                max-width: 350px;
+                max-height: 350px;
+            }
+            .rueda-seccion {
+                font-size: 10px;
+            }
+            .tema {
+                font-size: 11px;
+            }
+            .numero {
+                font-size: 11px;
+            }
+            .texto {
+                font-size: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Predicador Improvisado</h1>
+    <h2>Buenas Noticias del Reino</h2>
+
+    <div class="contenedor">
+        <div class="rueda-container">
+            <div class="flecha"></div>
+            <div class="rueda" id="rueda"></div>
+        </div>
+
+        <div class="jugadores">
+            <h3>Jugadores</h3>
+            <input type="text" id="nombre-jugador" placeholder="Nombre del jugador">
+            <button onclick="agregarJugador()">Agregar</button>
+            <ul id="lista-jugadores"></ul>
+        </div>
+    </div>
+
+    <div id="tema-seleccionado"></div>
+    <div id="temporizador">01:00</div>
+
+    <div class="botones">
+        <button id="btnGirar" onclick="girarRueda()">Girar</button>
+        <button id="btnDetener" onclick="detenerRueda()">Parar</button>
+        <button id="btnReiniciar" onclick="reiniciarJuego()">Reiniciar</button>
+        <button id="btnTemporizador" onclick="iniciarTemporizador()">Iniciar Temporizador</button>
+    </div>
+
+    <div id="reglas">
+        <h3>Reglas del Juego</h3>
+        <p>1. Cada jugador gira la rueda y debe predicar <strong>1 minuto</strong> sobre el tema seleccionado.</p>
+        <p>2. Gana quien acumule más puntos (según el número en la sección).</p>
+        <p>3. Temas difíciles dan más puntos (⭐ = fácil, ⭐⭐⭐ = difícil).</p>
+        <p>4. ¡Usa el temporizador para controlar el tiempo!</p>
+    </div>
+
+    <!-- Sonidos (hidden) -->
+    <audio id="sonidoGirar" src="https://assets.mixkit.co/sfx/preview/mixkit-game-show-spin-wheel-1920.mp3" preload="auto"></audio>
+    <audio id="sonidoDetener" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3" preload="auto"></audio>
+    <audio id="sonidoGanar" src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" preload="auto"></audio>
+
+    <script>
+        // Datos de la rueda (120 temas bíblicos con dificultad)
+        const temasOriginal = [
+            // Génesis (20 temas)
+            { tema: "Creación ⭐", numero: 3, texto: "Génesis 1:1", color: "#FF5733", dificultad: 1 },
+            { tema: "Jardín del Edén ⭐", numero: 3, texto: "Génesis 2:8", color: "#33FF57", dificultad: 1 },
+            { tema: "Caída del hombre ⭐⭐", numero: 5, texto: "Génesis 3:6", color: "#3357FF", dificultad: 2 },
+            
+            // Éxodo (20 temas)
+            { tema: "Éxodo de Egipto ⭐⭐⭐", numero: 8, texto: "Éxodo 12:31", color: "#33FFF0", dificultad: 3 },
+            { tema: "Los 10 Mandamientos ⭐⭐⭐", numero: 10, texto: "Éxodo 20:1-17", color: "#FFC733", dificultad: 3 },
+            
+            // Salmos (20 temas)
+            { tema: "Salmo 23 ⭐", numero: 3, texto: "Jehová es mi pastor", color: "#33FF8C", dificultad: 1 },
+            
+            // Evangelios (40 temas)
+            { tema: "Nacimiento de Jesús ⭐", numero: 3, texto: "Lucas 2:11", color: "#8C33FF", dificultad: 1 },
+            { tema: "Sermón del Monte ⭐⭐⭐", numero: 10, texto: "Mateo 5-7", color: "#FF338C", dificultad: 3 },
+            
+            // Epístolas (20 temas)
+            { tema: "Amor (1 Cor 13) ⭐⭐", numero: 5, texto: "El amor es sufrido", color: "#33A2FF", dificultad: 2 },
+            
+            // Apocalipsis (20 temas)
+            { tema: "Nuevo Cielo y Tierra ⭐⭐⭐", numero: 10, texto: "Apocalipsis 21:1", color: "#FF33A2", dificultad: 3 }
+            
+            // Agrega aquí más temas hasta completar 100+
+        ];
+
+        // Variables del juego
+        let anguloActual = 0;
+        let girando = false;
+        let intervalo;
+        let temporizadorIntervalo;
+        let tiempoRestante = 60;
+        let jugadores = [];
+        let temasDisponibles = [...temasOriginal];
+        let temaActual = null;
+
+        // Inicializar la rueda
+        function inicializarRueda() {
+            const rueda = document.getElementById('rueda');
+            rueda.innerHTML = '';
+
+            if (temasDisponibles.length === 0) {
+                temasDisponibles = [...temasOriginal];
+                alert("¡Todos los temas usados! Reiniciando la rueda.");
+            }
+
+            temasDisponibles.forEach((item, index) => {
+                const angulo = (360 / temasDisponibles.length) * index;
+                const seccion = document.createElement('div');
+                seccion.className = 'rueda-seccion';
+                seccion.style.transform = `rotate(${angulo}deg)`;
+                seccion.style.backgroundColor = item.color;
+                seccion.innerHTML = `
+                    <span class="tema">${item.tema}</span>
+                    <span class="numero">${item.numero} pts</span>
+                    <span class="texto">${item.texto}</span>
+                    <span class="dificultad">${'⭐'.repeat(item.dificultad)}</span>
+                `;
+                rueda.appendChild(seccion);
+            });
+        }
+
+        // Girar la rueda con sonido
+        function girarRueda() {
+            if (girando || temasDisponibles.length === 0) return;
+            girando = true;
+            document.getElementById('sonidoGirar').play();
+            const rueda = document.getElementById('rueda');
+            const vueltas = 5;
+            const anguloFinal = anguloActual + (360 * vueltas) + Math.floor(Math.random() * 360);
+
+            intervalo = setInterval(() => {
+                anguloActual += 5;
+                if (anguloActual >= anguloFinal) {
+                    clearInterval(intervalo);
+                    detenerRueda();
+                    return;
+                }
+                rueda.style.transform = `rotate(${anguloActual}deg)`;
+            }, 10);
+        }
+
+        // Detener la rueda con sonido
+        function detenerRueda() {
+            if (!girando) return;
+            clearInterval(intervalo);
+            girando = false;
+            document.getElementById('sonidoDetener').play();
+
+            const anguloPorSeccion = 360 / temasDisponibles.length;
+            const anguloNormalizado = anguloActual % 360;
+            const indiceSeleccionado = Math.floor(((360 - anguloNormalizado) % 360) / anguloPorSeccion);
+            
+            temaActual = temasDisponibles[indiceSeleccionado];
+            temasDisponibles.splice(indiceSeleccionado, 1);
+
+            document.getElementById('tema-seleccionado').innerHTML = `
+                <p>Tema: ${temaActual.tema}</p>
+                <p>Puntos: ${temaActual.numero}</p>
+                <p>Texto: ${temaActual.texto}</p>
+                <p>Dificultad: ${'⭐'.repeat(temaActual.dificultad)}</p>
+            `;
+
+            if (jugadores.length > 0) {
+                const jugadorActual = jugadores[0];
+                jugadorActual.puntaje += temaActual.numero;
+                actualizarListaJugadores();
+                jugadores.push(jugadores.shift());
+                if (temaActual.dificultad === 3) document.getElementById('sonidoGanar').play();
+            }
+        }
+
+        // Temporizador
+        function iniciarTemporizador() {
+            clearInterval(temporizadorIntervalo);
+            tiempoRestante = 60;
+            actualizarTemporizador();
+            temporizadorIntervalo = setInterval(() => {
+                tiempoRestante--;
+                actualizarTemporizador();
+                if (tiempoRestante <= 0) {
+                    clearInterval(temporizadorIntervalo);
+                    document.getElementById('sonidoGanar').play();
+                }
+            }, 1000);
+        }
+
+        function actualizarTemporizador() {
+            const minutos = Math.floor(tiempoRestante / 60);
+            const segundos = tiempoRestante % 60;
+            document.getElementById('temporizador').textContent = 
+                `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+        }
+
+        // Reiniciar el juego
+        function reiniciarJuego() {
+            anguloActual = 0;
+            temasDisponibles = [...temasOriginal];
+            document.getElementById('rueda').style.transform = 'rotate(0deg)';
+            document.getElementById('tema-seleccionado').innerHTML = '';
+            clearInterval(temporizadorIntervalo);
+            tiempoRestante = 60;
+            actualizarTemporizador();
+            inicializarRueda();
+        }
+
+        // Jugadores
+        function agregarJugador() {
+            const nombre = document.getElementById('nombre-jugador').value.trim();
+            if (nombre && !jugadores.some(j => j.nombre === nombre)) {
+                jugadores.push({
+                    nombre: nombre,
+                    puntaje: 0
+                });
+                actualizarListaJugadores();
+                document.getElementById('nombre-jugador').value = '';
+            }
+        }
+
+        function actualizarListaJugadores() {
+            const lista = document.getElementById('lista-jugadores');
+            lista.innerHTML = '';
+            jugadores.forEach(jugador => {
+                const item = document.createElement('li');
+                item.innerHTML = `
+                    <span>${jugador.nombre}</span>
+                    <span class="puntaje">${jugador.puntaje} pts</span>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        // Inicializar
+        window.onload = inicializarRueda;
+    </script>
+</body>
+</html>
